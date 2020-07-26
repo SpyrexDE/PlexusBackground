@@ -1,2 +1,2 @@
 # PlexusBackground
-Just drag the scene in another scene.
+Just drag the scene into another scene.
