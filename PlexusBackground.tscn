@@ -1,0 +1,91 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Control
+
+export var maxDots = 70
+var positions = []
+var sizes = []
+var velocities = []
+
+
+func _ready():
+	for i in maxDots:
+		spawnNew(Vector2(rand_range(-100, self.rect_size.x+100), rand_range(-100, self.rect_size.y+100)))
+
+func _process(delta):
+	#Spawning
+	if positions.size() < maxDots:
+		spawnNew()
+	#Movement
+	for dot in positions:
+		positions[positions.find(dot)] += velocities[positions.find(dot)]
+	#Destroying
+	for dot in positions:
+		if dot.x < -200 || dot.y < -200 || dot.x > self.rect_size.x + 200 || dot.y > self.rect_size.y + 200:
+			var dotID = positions.find(dot)
+			positions.remove(dotID)
+			sizes.remove(dotID)
+			velocities.remove(dotID)
+	update()
+
+func spawnNew(pos = null):
+	if pos == null:
+		pos = newRandPos()
+	var size = rand_range(5, 10)
+	var vel = Vector2(rand_range(-1, 1), rand_range(-1, 1))
+	positions.append(pos)
+	sizes.append(size)
+	velocities.append(vel)
+
+func _draw():
+	for dot in positions:
+		var dotID = positions.find(dot)
+		draw_circle(positions[dotID], sizes[dotID], Color.white)
+	#Connecting
+	for dot in positions:
+		for otherDot in positions:
+			if dot.distance_to(otherDot) < 300.0:
+				var alpha = clamp(dot.distance_to(otherDot)/120, 0, 2)
+				draw_line(dot, otherDot, Color(1,1,1, alpha), 1.0, true)
+
+func newRandPos():
+	#Top
+	var x1 = rand_range(-200, self.rect_size.x + 200)
+	var y1 = rand_range(-200, -100)
+	#Bottom
+	var x2 = rand_range(-200, self.rect_size.x + 200)
+	var y2 = rand_range(self.rect_size.y+ 100, self.rect_size.y + 200)
+	#Left
+	var x3 = rand_range(-200, -100)
+	var y3 = rand_range(-200, self.rect_size.y + 200)
+	#Right
+	var x4 = rand_range(self.rect_size.x + 100, self.rect_size.x + 200)
+	var y4 = rand_range(-200, self.rect_size.y + 200)
+	
+	var pos = Vector2()
+	var choose = int(rand_range(1,5))
+	match choose:
+		1:
+			pos.x = x1
+			pos.y = y1
+		2:
+			pos.x = x2
+			pos.y = y2
+		3:
+			pos.x = x3
+			pos.y = y3
+		4:
+			pos.x = x4
+			pos.y = y4
+	return pos
+"
+
+[node name="PlexusBackground" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
